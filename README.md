@@ -1,70 +1,161 @@
-# Getting Started with Create React App
+## Day 1
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### **1. Functional Component Syntax**
 
-## Available Scripts
+```jsx
+function App() {
+  // component logic and return statement here
+}
+```
 
-In the project directory, you can run:
+- **`function App()`**: As before, this defines a **functional component** in React. We use hooks like `useState` inside this component to manage states such as the list of tasks, the input field, and the temporary text being edited.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### **2. useState Hook Syntax**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```jsx
+const [tasks, setTasks] = useState([]);
+const [input, setInput] = useState("");
+const [editingText, setEditingText] = useState("");
+```
 
-### `npm test`
+- **`const [tasks, setTasks] = useState([])`**: Initializes `tasks` as an empty array and `setTasks` as the function to update it. It holds the list of tasks.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **`const [input, setInput] = useState('')`**: This holds the text that the user types into the input field to add a new task.
 
-### `npm run build`
+- **`const [editingText, setEditingText] = useState('')`**: This new piece of state stores the text temporarily while the user is editing a task. It allows users to type and modify the task text without immediately updating the `tasks` state.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### **3. addTask Function**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```jsx
+const addTask = () => {
+  if (input) {
+    setTasks([...tasks, { id: Date.now(), text: input, isEditing: false }]);
+    setInput("");
+  }
+};
+```
 
-### `npm run eject`
+- **`if (input)`**: Ensures that a task is added only if the input field isn’t empty.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **`setTasks([...tasks, { id: Date.now(), text: input, isEditing: false }])`**: Uses the spread operator (`...tasks`) to copy the current tasks and adds a new task object with an ID, the task text (`input`), and `isEditing` set to `false`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **`setInput('')`**: After adding the task, the input field is cleared.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### **4. deleteTask Function**
 
-## Learn More
+```jsx
+const deleteTask = (id) => {
+  setTasks(tasks.filter((task) => task.id !== id));
+};
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **`setTasks(tasks.filter((task) => task.id !== id))`**: The `filter()` method creates a new array that excludes the task with the matching `id`, effectively deleting it.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+### **5. handleEditChange Function**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```jsx
+const handleEditChange = (e) => {
+  setEditingText(e.target.value); // Update temporary text while typing
+};
+```
 
-### Analyzing the Bundle Size
+- **`setEditingText(e.target.value)`**: Updates the `editingText` state as the user types in the input field while editing a task. This is what enables real-time typing without saving changes to the task immediately.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+### **6. saveEditTask Function**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```jsx
+const saveEditTask = (id) => {
+  setTasks(
+    tasks.map((task) =>
+      task.id === id ? { ...task, text: editingText, isEditing: false } : task
+    )
+  );
+  setEditingText(""); // Clear the temporary text after saving
+};
+```
 
-### Advanced Configuration
+- **`tasks.map((task) => task.id === id ? { ...task, text: editingText, isEditing: false } : task)`**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+  - The `map()` function iterates over the `tasks` array and returns a new array.
+  - For the task that matches the `id`, we update its `text` to the value in `editingText` and set `isEditing` to `false` to end the edit mode.
+  - For other tasks, the task object remains unchanged.
 
-### Deployment
+- **`setEditingText('')`**: Resets the temporary `editingText` after the task is saved.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+### **7. toggleEditTask Function**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```jsx
+const toggleEditTask = (id, currentText) => {
+  setTasks(
+    tasks.map((task) =>
+      task.id === id ? { ...task, isEditing: !task.isEditing } : task
+    )
+  );
+  setEditingText(currentText); // Set temporary text when entering edit mode
+};
+```
+
+- **`tasks.map()`**: The `map()` function returns a new array where the task with the matching `id` has its `isEditing` property toggled (i.e., switches between `true` and `false`).
+- **`setEditingText(currentText)`**: When the user enters the edit mode (double-clicking the task), we set the `editingText` to the task’s current text so the input field can display it for editing.
+
+---
+
+### **8. JSX (JavaScript XML) Syntax**
+
+```jsx
+return (
+  <div>
+    <h1>To-Do List</h1>
+    <input value={input} onChange={(e) => setInput(e.target.value)} />
+    <button onClick={addTask}>Add Task</button>
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          {task.isEditing ? (
+            <input
+              value={editingText} // Binds input field to temporary editing text
+              onChange={handleEditChange} // Update text while typing
+              onBlur={() => saveEditTask(task.id)} // Save when focus is lost
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEditTask(task.id); // Save when "Enter" is pressed
+              }}
+              autoFocus
+            />
+          ) : (
+            <span onDoubleClick={() => toggleEditTask(task.id, task.text)}>
+              {task.text}
+            </span>
+          )}
+          <button onClick={() => deleteTask(task.id)}>Delete</button>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+```
+
+#### Key Changes:
+
+- **`value={editingText}`**: The input field’s value is bound to the `editingText` state, which holds the temporary text for the task being edited.
+
+- **`onChange={handleEditChange}`**: This updates the `editingText` as the user types, but it doesn’t affect the main `tasks` state immediately.
+
+- **`onBlur={() => saveEditTask(task.id)}`**: When the input field loses focus (e.g., the user clicks elsewhere), the task is saved by calling `saveEditTask`.
+
+- **`onKeyDown={(e) => { if (e.key === 'Enter') saveEditTask(task.id); }}`**: This listens for the "Enter" key press. If the user presses "Enter", the task is saved immediately.
+
+- **`onDoubleClick={() => toggleEditTask(task.id, task.text)}`**: When the user double-clicks a task, the `toggleEditTask` function is called to switch the task to edit mode and set the temporary text (`editingText`) to the task’s current text.
+
+---
